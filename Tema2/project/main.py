@@ -20,7 +20,7 @@ def decompose_matrix(matrix_a, d, precision):
 
 
 def calculate_d(matrix_a, col, d):
-    diagonal_sum = 0
+    diagonal_sum = 0.
     for k in range(col):
         diagonal_sum += d[k] * matrix_a[col][k] * matrix_a[col][k]
     d[col] = matrix_a[col][col] - diagonal_sum
@@ -28,7 +28,7 @@ def calculate_d(matrix_a, col, d):
 
 
 def calculate_l(matrix_a, d, row, col):
-    l_sum = 0
+    l_sum = 0.
     for k in range(col):
         l_sum += d[k] * matrix_a[row][k] * matrix_a[col][k]
     matrix_a[row][col] = (matrix_a[row][col] - l_sum) / d[col]
@@ -36,16 +36,29 @@ def calculate_l(matrix_a, d, row, col):
     return matrix_a
 
 
-def calculate_z():
+def calculate_z(matrix_a, size, vect):
+    z = [0.0] * size
+    for i in range(size):
+        sum_1 = 0.
+        for j in range(i):
+            sum_1 += matrix_a[i][j] * z[j]
+        z[i] = vect[i] - sum_1
+
+    return z
 
 
+def calculate_y(d, z, size):
+    y = [0.0] * size
+    for i in range(size):
+        y[i] = z[i] / d[i]
+    return y
 
-def calculate_y():
-    pass
 
+def calculate_x(matrix_a, y, size):
+    x = [0.0] * size
+    for i in range(size):
+        sum_1 = 0.
 
-def calculate_x():
-    pass
 
 
 def generate_symmetrical_matrix(size):
@@ -66,6 +79,11 @@ def run(size, precision, vect):
         print("There was a 0 in d")
     else:
         print(result)
+        matrix_a, d = result
+        z = calculate_z(matrix_a, size, vect)
+        print(z)
+        y = calculate_y(d, z, size)
+        print(y)
 
 
-run(3, 0.01, [0.0, 0.1, 1.5])
+run(3, 0.01, [14., 40., 53.])
