@@ -77,9 +77,8 @@ def generate_symmetrical_matrix(size):
 
 def run(size, precision, vect):
     # uncomment one
-    # matrix_a = generate_symmetrical_matrix(size)
-
-    matrix_a = MATRIX
+    # matrix_a = MATRIX
+    matrix_a = generate_symmetrical_matrix(size)
 
     result = decompose_matrix(matrix_a, [0.0] * size, precision)
     if not result:
@@ -96,5 +95,5 @@ def run(size, precision, vect):
         print('X: ', x)
 
 
-run(3, 0.01, [14., 40., 53.])
-# run(100, 0.01, np.random.rand(100))
+# run(3, 0.01, [14., 40., 53.])
+run(100, 0.01, np.random.rand(100))
