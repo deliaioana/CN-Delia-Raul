@@ -56,9 +56,12 @@ def calculate_y(d, z, size):
 
 def calculate_x(matrix_a, y, size):
     x = [0.0] * size
-    for i in range(size):
+    for i in range(size-1, 0, -1):
         sum_1 = 0.
-
+        for j in range(i+1, size):
+            sum_1 += matrix_a[j][i] * x[j]
+        x[i] = y[i] - sum_1
+    return x
 
 
 def generate_symmetrical_matrix(size):
@@ -73,17 +76,25 @@ def generate_symmetrical_matrix(size):
 
 
 def run(size, precision, vect):
-    matrix_a = generate_symmetrical_matrix(size)
-    result = decompose_matrix(MATRIX, [0.0] * size, precision)
+    # uncomment one
+    # matrix_a = generate_symmetrical_matrix(size)
+
+    matrix_a = MATRIX
+
+    result = decompose_matrix(matrix_a, [0.0] * size, precision)
     if not result:
         print("There was a 0 in d")
     else:
-        print(result)
         matrix_a, d = result
+        print('A: ', matrix_a)
+        print('d: ', d)
         z = calculate_z(matrix_a, size, vect)
-        print(z)
+        print('Z: ', z)
         y = calculate_y(d, z, size)
-        print(y)
+        print('Y:', y)
+        x = calculate_x(matrix_a, y, size)
+        print('X: ', x)
 
 
 run(3, 0.01, [14., 40., 53.])
+# run(100, 0.01, np.random.rand(100))
