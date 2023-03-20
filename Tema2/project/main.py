@@ -1,7 +1,10 @@
 import numpy as np
 import random
 
-MATRIX = np.array([[2., 4., 5.], [4., 12., 14.], [5., 14., 19.5]])
+import scipy as scipy
+
+# MATRIX = np.array([[2., 4., 5.], [4., 12., 14.], [5., 14., 19.5]])
+MATRIX = np.array([[1., 2.5, 3.], [2.5, 8.25, 15.5], [3., 15.5, 43.]])
 
 
 def is_zero(number, precision):
@@ -77,8 +80,10 @@ def generate_symmetrical_matrix(size):
 
 def run(size, precision, vect):
     # uncomment one
-    # matrix_a = MATRIX
+    # matrix_a = MATRIX.copy()
     matrix_a = generate_symmetrical_matrix(size)
+
+    copy = matrix_a.copy()
 
     result = decompose_matrix(matrix_a, [0.0] * size, precision)
     if not result:
@@ -94,6 +99,37 @@ def run(size, precision, vect):
         x = calculate_x(matrix_a, y, size)
         print('X: ', x)
 
+    # print(f'Det A: {np.linalg.det(copy)}')
+    L = np.zeros((size, size), dtype=float)
+    D = np.zeros((size, size), dtype=float)
+    for i in range(size):
+        for j in range(size):
+            if i == j:
+                L[i][j] = 1.
+                D[i][j] = d[i]
+            elif i < j:
+                L[i][j] = 0.
+                D[i][j] = 0.
+            else:
+                L[i][j] = matrix_a[i][j]
+                D[i][j] = 0.
+    Lt = np.transpose(L)
 
-# run(3, 0.01, [14., 40., 53.])
-run(100, 0.01, np.random.rand(100))
+    print(f'Det LDLt: {np.linalg.det(L) * np.linalg.det(D) * np.linalg.det(Lt)}')
+
+    # L = scipy.linalg.cholesky(copy, lower=True)
+    # U = scipy.linalg.cholesky(copy, lower=False)
+    #
+    # print(f'L: {L}')
+    # print(f'U: {U}')
+
+    auto_x = np.linalg.solve(copy, vect)
+    print(auto_x)
+
+    auto_sol = np.linalg.norm(np.dot(copy, auto_x) - vect)
+    print(f'Solution correct: {is_zero(auto_sol, precision)}')
+
+
+# uncomment one
+# run(3, 0.00000001, [12., 38., 68.])
+run(5, 0.00000001, np.random.rand(5))
