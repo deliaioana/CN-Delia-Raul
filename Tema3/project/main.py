@@ -1,4 +1,6 @@
 # imports
+import copy
+
 import numpy as np
 import random
 
@@ -7,7 +9,7 @@ MATRIX_A = [[0., 0., 4.],
             [1., 2., 3.],
             [0., 1., 2.]]
 N = 3
-PRECISION = 10 ** (-15)
+PRECISION = 10 ** (-6)
 S = [3., 2., 1.]
 
 
@@ -123,29 +125,41 @@ def compute_difference(x_qr, x_householder):
     return np.linalg.norm(np.array(x_qr) - np.array(x_householder))
 
 
-def compute_errors(matrix_a, x_householder, x_qr, b, s):
-    pass
+def compute_errors(matrix_a, x_householder, x_qr, b, s, precision):
+    err_1 = np.linalg.norm(np.dot(matrix_a, x_householder) - b)
+    err_2 = np.linalg.norm(np.dot(matrix_a, x_qr) - b)
+    err_3 = np.linalg.norm(np.array(x_householder) - np.array(s)) / np.linalg.norm(s)
+    err_4 = np.linalg.norm(np.array(x_qr) - np.array(s)) / np.linalg.norm(s)
+
+    print(err_1 < precision, err_2 < precision, err_3 < precision, err_4 < precision)
 
 
-def invert_using_qr_desc(qr_dec):
-    pass
+def invert_using_qr_desc(matrix_a, matrix_q, matrix_r, n):
+    if np.linalg.det(matrix_a) == 0:
+        return 'Impossible'
 
+    for j in range(n):
+        ej = [0.] * n
+        for i in range(n):
+            ej[i] = int(i == j)
 
-def invert_using_lib(matrix_a):
-    pass
+        b = np.matmul(np.transpose(matrix_q), np.transpose(ej))
+
 
 
 def compare_inverses(inverted_a, lib_inverted_a):
-    pass
+    np.linalg.norm(np.array(inverted_a) - np.array(lib_inverted_a))
 
 
 def run():
     # Task 6
     variables = get_input()
     matrix_a, n, precision, s = variables
+    matrix_a_copy = copy.deepcopy(matrix_a)
 
     # Task 1
     b = compute_vector_b(matrix_a, s, n)
+    b_copy = copy.deepcopy(b)
     print('VECTOR B: \n', b)
 
     # Task 2
@@ -161,12 +175,12 @@ def run():
     print('DIFFERENCE: ', compute_difference(x_qr, x_householder))
 
     # Task 4
-    compute_errors(matrix_a, x_householder, x_qr, b, s)
+    compute_errors(matrix_a_copy, x_householder, x_qr, b_copy, s, precision)
 
     # Task 5
-    inverted_a = invert_using_qr_desc(matrix_q)
-    lib_inverted_a = invert_using_lib(matrix_a)
-    compare_inverses(inverted_a, lib_inverted_a)
+    inverted_a = invert_using_qr_desc(matrix_a_copy, matrix_q, matrix_r, n)
+    lib_inverted_a = np.linalg.inv(matrix_a_copy)
+    print(compare_inverses(inverted_a, lib_inverted_a))
 
 
 run()
