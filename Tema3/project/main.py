@@ -144,11 +144,22 @@ def invert_using_qr_desc(matrix_a, matrix_q, matrix_r, n):
             ej[i] = int(i == j)
 
         b = np.matmul(np.transpose(matrix_q), np.transpose(ej))
+        x_star = compute_x(matrix_r, b, n)
+        print(x_star)
 
 
+def compute_x(matrix_a, y, size):
+    x = [0.0] * size
+    for i in range(size-1, 0, -1):
+        sum_1 = 0.
+        for j in range(i+1, size):
+            sum_1 += matrix_a[i][j] * x[j]
+        x[i] = (y[i] - sum_1) / matrix_a[i][i]
+    return x
 
-def compare_inverses(inverted_a, lib_inverted_a):
-    np.linalg.norm(np.array(inverted_a) - np.array(lib_inverted_a))
+
+#def compare_inverses(inverted_a, lib_inverted_a):
+ #   np.linalg.norm(np.array(inverted_a) - np.array(lib_inverted_a))
 
 
 def run():
@@ -180,7 +191,7 @@ def run():
     # Task 5
     inverted_a = invert_using_qr_desc(matrix_a_copy, matrix_q, matrix_r, n)
     lib_inverted_a = np.linalg.inv(matrix_a_copy)
-    print(compare_inverses(inverted_a, lib_inverted_a))
+    #print(compare_inverses(inverted_a, lib_inverted_a))
 
 
 run()
