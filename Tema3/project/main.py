@@ -115,7 +115,7 @@ def compute_x_qr_with_library(matrix_a, b):
     return x_qr
 
 
-def compute_x_householder(matrix_q, matrix_r, b):
+def compute_x_householder(matrix_r, b):
     x_householder = list(np.linalg.solve(matrix_r, b))
     return x_householder
 
@@ -189,7 +189,7 @@ def run():
     # Task 3
     x_qr = compute_x_qr_with_library(matrix_a, b)
     print('X QR WITH LIBRARY: ', x_qr)
-    x_householder = compute_x_householder(matrix_q, matrix_r, b)
+    x_householder = compute_x_householder(matrix_r, b)
     print('X HOUSEHOLDER WITH LIBRARY: ', x_householder)
     print('DIFFERENCE: ', compute_difference(x_qr, x_householder))
 
@@ -206,4 +206,3 @@ def run():
 
 
 run()
-# please work
