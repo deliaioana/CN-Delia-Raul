@@ -138,6 +138,8 @@ def invert_using_qr_desc(matrix_a, matrix_q, matrix_r, n):
     if np.linalg.det(matrix_a) == 0:
         return 'Impossible'
 
+    inverted_matrix = []
+
     for j in range(n):
         ej = [0.] * n
         for i in range(n):
@@ -145,12 +147,14 @@ def invert_using_qr_desc(matrix_a, matrix_q, matrix_r, n):
 
         b = np.matmul(np.transpose(matrix_q), np.transpose(ej))
         x_star = compute_x(matrix_r, b, n)
-        print(x_star)
+        inverted_matrix.append(x_star)
+
+    return np.transpose(inverted_matrix)
 
 
 def compute_x(matrix_a, y, size):
     x = [0.0] * size
-    for i in range(size-1, 0, -1):
+    for i in range(size-1, -1, -1):
         sum_1 = 0.
         for j in range(i+1, size):
             sum_1 += matrix_a[i][j] * x[j]
@@ -158,8 +162,12 @@ def compute_x(matrix_a, y, size):
     return x
 
 
-#def compare_inverses(inverted_a, lib_inverted_a):
- #   np.linalg.norm(np.array(inverted_a) - np.array(lib_inverted_a))
+def compare_inverses(inverted_a, lib_inverted_a, precision):
+    print('MATRIX A INVERTED: \n', inverted_a)
+    print('MATRIX A INVERTED WITH LIB: \n', lib_inverted_a)
+
+    norm = np.linalg.norm(np.array(inverted_a) - np.array(lib_inverted_a))
+    return norm < precision
 
 
 def run():
@@ -190,8 +198,11 @@ def run():
 
     # Task 5
     inverted_a = invert_using_qr_desc(matrix_a_copy, matrix_q, matrix_r, n)
-    lib_inverted_a = np.linalg.inv(matrix_a_copy)
-    #print(compare_inverses(inverted_a, lib_inverted_a))
+    if isinstance(inverted_a, str):
+        print('A is not invertible')
+    else:
+        lib_inverted_a = np.linalg.inv(matrix_a_copy)
+        print(compare_inverses(inverted_a, lib_inverted_a, precision))
 
 
 run()
