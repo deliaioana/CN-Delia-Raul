@@ -31,16 +31,23 @@ def get_input():
     else:
         variables = get_input_from_files('a.txt', 'b.txt')
 
-    print('N (for matrix A): ', variables[0])
-    print('MATRIX A: \n', variables[1])
-    print('N (for vector B): ', variables[2])
-    print('VECTOR B: \n', variables[3])
+    print('N (for matrix A): ', variables[1])
+    print('MATRIX A: \n', variables[0])
+    print('N (for vector B): ', variables[3])
+    print('VECTOR B: \n', variables[2])
     print('PRECISION: \n', variables[4])
     return variables
 
 
-def has_zero_on_diagonal():
-    pass
+def has_zero_on_diagonal(matrix_a, size):
+    zeros_on_diagonal = [x for x in range(size)]
+
+    for i, row in enumerate(matrix_a):
+        for element, j in row:
+            if i == j and i in zeros_on_diagonal:
+                zeros_on_diagonal.remove(i)
+
+    return bool(zeros_on_diagonal)
 
 
 def solve_with_gauss_seidel(matrix_a, na, vector_b, nb):
@@ -56,19 +63,19 @@ def run():
     variables = get_input()
     matrix_a, na, vector_b, nb, precision = variables
 
-    answer = has_zero_on_diagonal()
+    answer = has_zero_on_diagonal(matrix_a, na)
     print('ARE ALL ELEMENTS ON THE DIAGONAL NON-ZERO?')
-    print(answer)
+    print(not answer)
 
-    # Task 2
-    x, number_of_iterations = solve_with_gauss_seidel(matrix_a, na, vector_b, nb)
-    print('SOLUTION FOR X: ', x)
-    print('NUMBER OF ITERATIONS: ', number_of_iterations)
-
-    # Task 3
-    norm = compute_error(matrix_a, x, vector_b)
-    print('NORM: ', norm)
-    print('IS IT LOWER THAN PRECISION? ', (norm < precision))
+    # # Task 2
+    # x, number_of_iterations = solve_with_gauss_seidel(matrix_a, na, vector_b, nb)
+    # print('SOLUTION FOR X: ', x)
+    # print('NUMBER OF ITERATIONS: ', number_of_iterations)
+    #
+    # # Task 3
+    # norm = compute_error(matrix_a, x, vector_b)
+    # print('NORM: ', norm)
+    # print('IS IT LOWER THAN PRECISION? ', (norm < precision))
 
 
 run()
