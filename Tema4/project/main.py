@@ -13,41 +13,14 @@ NB = 5
 PRECISION = 10 ** (-6)
 
 
-def randomize_n():
-    return random.randint(1, 200)
+def get_input_from_files(file_a, file_b):
+    n = None
 
+    matrix_a = None
 
-def randomize_precision():
-    power = random.randint(1, 15)
-    return 10 ** (-power)
+    vector_b = None
+    precision = None
 
-
-def randomize_vector_s(size):
-    return np.random.uniform(size=size)
-
-
-def generate_random_sparse_matrix(size):
-    number_of_elements = random.randint(max(0, size - int(size / 4)), size + int(size / 4))
-    matrix_a = []
-
-    for i in range(size):
-        row = []
-
-
-def generate_specific_sparse_matrix(size):
-    pass
-
-
-def randomize_input(allow_zero):
-    n = randomize_n()
-
-    if allow_zero:
-        matrix_a = generate_random_sparse_matrix(n)
-    else:
-        matrix_a = generate_specific_sparse_matrix(n)
-
-    vector_b = randomize_vector_s(n)
-    precision = randomize_precision()
     return matrix_a, n, vector_b, n, precision,
 
 
@@ -56,11 +29,7 @@ def get_input():
     if answer == 'y':
         variables = MATRIX_A, NA, VECTOR_B, NB, PRECISION
     else:
-        answer = input('Do you allow zero values on the main diagonal? y/n\n')
-        if answer == 'y':
-            variables = randomize_input(True)
-        else:
-            variables = randomize_input(False)
+        variables = get_input_from_files('a.txt', 'b.txt')
 
     print('N (for matrix A): ', variables[0])
     print('MATRIX A: \n', variables[1])
