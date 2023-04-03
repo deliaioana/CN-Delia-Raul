@@ -1,8 +1,7 @@
-import random
-import numpy as np
+import re
 
 # Given variables
-MATRIX_A = [[(2.5, 2), (102.5, 0)],
+MATRIX_A = [[(2.5, 2), (102.5, 0), (3.0, 2)],
             [(3.5, 0), (0.33, 4), (1.05, 2), (104.88, 1)],
             [(100.0, 2)],
             [(1.3, 1), (101.3, 3)],
@@ -14,22 +13,47 @@ PRECISION = 10 ** (-6)
 
 
 def get_input_from_files(file_a, file_b):
-    n = None
+    with open(file_a) as f:
+        size_a = [int(x) for x in next(f).split()][0]
+        matrix_a = [[] for _ in range(size_a)]
 
-    matrix_a = None
+        for line in f:
+            values = line.replace(', ', ' ').split()
+            value = float(values[0])
+            row = int(values[1])
+            col = int(values[2])
 
-    vector_b = None
-    precision = None
+            new_value = value
+
+            current_pair = [pair[0] for pair in matrix_a[row] if pair[1] == col]
+            if current_pair:
+                current_value = current_pair[0]
+                matrix_a[row].remove((current_value, col))
+
+                new_value = current_value + value
+
+            matrix_a[row].append((new_value, col))
+
+    with open(file_b) as f:
+        size_b = [int(x) for x in next(f).split()][0]
+        vector_b = [[] * size_b]
+
+        for line in f:
+            value = float(line.split()[0])
+            vector_b.append(value)
+
+    n = size_a
+    precision = PRECISION
 
     return matrix_a, n, vector_b, n, precision,
 
 
 def get_input():
-    answer = input('Do you want to use specific input? y/n\n')
+    answer = input('Do you want to use the file input? y/n\n')
     if answer == 'y':
-        variables = MATRIX_A, NA, VECTOR_B, NB, PRECISION
+        variables = get_input_from_files('input_files/a_v2.txt', 'input_files/b_v2.txt')
     else:
-        variables = get_input_from_files('a.txt', 'b.txt')
+        variables = MATRIX_A, NA, VECTOR_B, NB, PRECISION
 
     print('N (for matrix A): ', variables[1])
     print('MATRIX A: \n', variables[0])
