@@ -1,4 +1,4 @@
-import re
+import numpy as np
 
 # Given variables
 MATRIX_A = [[(2.5, 2), (102.5, 0), (3.0, 2)],
@@ -34,24 +34,37 @@ def get_input_from_files(file_a, file_b):
 
             matrix_a[row].append((new_value, col))
 
+        diagonal = []
+
+        for count, row in enumerate(matrix_a):
+            non_zero_elem = False
+            for pair in row:
+                if pair[1] == count:
+                    diagonal.append(pair[0])
+                    non_zero_elem = True
+            if not non_zero_elem:
+                diagonal.append(0.)
+
+        print('DIAGONAL: ', diagonal)
+
     with open(file_b) as f:
         size_b = [int(x) for x in next(f).split()][0]
-        vector_b = [[] * size_b]
+        vector_b = []
 
         for line in f:
             value = float(line.split()[0])
             vector_b.append(value)
 
-    n = size_a
+    n = size_b
     precision = PRECISION
 
-    return matrix_a, n, vector_b, n, precision,
+    return matrix_a, n, vector_b, n, precision, diagonal
 
 
 def get_input():
     answer = input('Do you want to use the file input? y/n\n')
     if answer == 'y':
-        variables = get_input_from_files('input_files/a_v2.txt', 'input_files/b_v2.txt')
+        variables = get_input_from_files('input_files/a.txt', 'input_files/b.txt')
     else:
         variables = MATRIX_A, NA, VECTOR_B, NB, PRECISION
 
@@ -78,28 +91,38 @@ def solve_with_gauss_seidel(matrix_a, na, vector_b, nb):
     pass
 
 
-def compute_error(matrix_a, x, vector_b):
-    pass
+def compute_error(matrix_a, x, vector_b, diagonal):
+    matrix_a_x = []
+
+    for i in range(len(matrix_a)):
+        row_sum = 0.
+        for j in range(len(matrix_a[i])):
+            row_sum += matrix_a[i][j][0] * x[matrix_a[i][j][1]]
+        matrix_a_x.append(row_sum + diagonal[i] * x[i])
+
+    print(matrix_a_x)
+
+    return np.linalg.norm(np.array(matrix_a_x) - np.array(vector_b), ord=np.inf)
 
 
 def run():
     # Task 1
     variables = get_input()
-    matrix_a, na, vector_b, nb, precision = variables
+    matrix_a, na, vector_b, nb, precision, diagonal = variables
 
     answer = has_zero_on_diagonal(matrix_a, na)
     print('ARE ALL ELEMENTS ON THE DIAGONAL NON-ZERO?')
     print(not answer)
 
-    # # Task 2
+    # Task 2
     # x, number_of_iterations = solve_with_gauss_seidel(matrix_a, na, vector_b, nb)
     # print('SOLUTION FOR X: ', x)
     # print('NUMBER OF ITERATIONS: ', number_of_iterations)
-    #
-    # # Task 3
-    # norm = compute_error(matrix_a, x, vector_b)
-    # print('NORM: ', norm)
-    # print('IS IT LOWER THAN PRECISION? ', (norm < precision))
+
+    # Task 3
+    norm = compute_error(matrix_a, [1. for _ in range(na)], vector_b, diagonal)
+    print('NORM: ', norm)
+    print('IS IT LOWER THAN PRECISION? ', (norm < precision))
 
 
 run()
