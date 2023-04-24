@@ -55,7 +55,7 @@ def get_input_from_files(file_a, file_b):
 
 
 def get_input():
-    variables = get_input_from_files('input_files/a.txt', 'input_files/b.txt')
+    variables = get_input_from_files('input_files/a2.txt', 'input_files/b2.txt')
 
     print('N (for matrix A): ', variables[1])
     print('MATRIX A: \n', variables[0])
