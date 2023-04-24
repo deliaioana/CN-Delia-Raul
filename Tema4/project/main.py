@@ -1,14 +1,7 @@
+import numpy
 import numpy as np
 
 # Given variables
-MATRIX_A = [[(2.5, 2), (102.5, 0), (3.0, 2)],
-            [(3.5, 0), (0.33, 4), (1.05, 2), (104.88, 1)],
-            [(100.0, 2)],
-            [(1.3, 1), (101.3, 3)],
-            [(1.5, 3), (0.73, 0), (102.23, 4)]]
-NA = 5
-VECTOR_B = [6., 7., 8., 9., 1.]
-NB = 5
 PRECISION = 10 ** (-6)
 
 
@@ -62,11 +55,7 @@ def get_input_from_files(file_a, file_b):
 
 
 def get_input():
-    answer = input('Do you want to use the file input? y/n\n')
-    if answer == 'y':
-        variables = get_input_from_files('input_files/a.txt', 'input_files/b.txt')
-    else:
-        variables = MATRIX_A, NA, VECTOR_B, NB, PRECISION
+    variables = get_input_from_files('input_files/a.txt', 'input_files/b.txt')
 
     print('N (for matrix A): ', variables[1])
     print('MATRIX A: \n', variables[0])
@@ -87,8 +76,38 @@ def has_zero_on_diagonal(matrix_a, size):
     return bool(zeros_on_diagonal)
 
 
-def solve_with_gauss_seidel(matrix_a, na, vector_b, nb):
-    pass
+def solve_with_gauss_seidel(matrix_a, vector_b, n):
+    x = [0.] * n
+
+    k = 0
+
+    while True:
+        dif_sum = 0.
+        for i in range(n):
+            val = vector_b[i]
+            diagonal_element = 0.
+
+            for pair in matrix_a[i]:
+                element, j = pair
+                if i != j:
+                    val = val - element * x[j]
+                else:
+                    diagonal_element = element
+
+            val = val / diagonal_element
+            dif = abs(x[i] - val)
+            dif_sum += dif * dif
+            x[i] = val
+        norm = numpy.sqrt(dif_sum)
+
+        k += 1
+        if norm < PRECISION or k > 10000 or norm > 10 ** 8:
+            break
+
+    if norm < PRECISION:
+        return x, k
+
+    return 'Divergence'
 
 
 def compute_error(matrix_a, x, vector_b, diagonal):
@@ -98,9 +117,7 @@ def compute_error(matrix_a, x, vector_b, diagonal):
         row_sum = 0.
         for j in range(len(matrix_a[i])):
             row_sum += matrix_a[i][j][0] * x[matrix_a[i][j][1]]
-        matrix_a_x.append(row_sum + diagonal[i] * x[i])
-
-    print(matrix_a_x)
+        matrix_a_x.append(row_sum)
 
     return np.linalg.norm(np.array(matrix_a_x) - np.array(vector_b), ord=np.inf)
 
@@ -115,14 +132,20 @@ def run():
     print(not answer)
 
     # Task 2
-    # x, number_of_iterations = solve_with_gauss_seidel(matrix_a, na, vector_b, nb)
-    # print('SOLUTION FOR X: ', x)
-    # print('NUMBER OF ITERATIONS: ', number_of_iterations)
+    if not answer:
+        solution = solve_with_gauss_seidel(matrix_a, vector_b, na)
 
-    # Task 3
-    norm = compute_error(matrix_a, [1. for _ in range(na)], vector_b, diagonal)
-    print('NORM: ', norm)
-    print('IS IT LOWER THAN PRECISION? ', (norm < precision))
+        if solution == 'Divergence':
+            print(solution)
+        else:
+            x, number_of_iterations = solution
+            print('SOLUTION FOR X: ', x)
+            print('NUMBER OF ITERATIONS: ', number_of_iterations)
+
+            # Task 3
+            norm = compute_error(matrix_a, x, vector_b, diagonal)
+            print('NORM: ', norm)
+            print('IS IT LOWER THAN PRECISION? ', (norm < precision))
 
 
 run()
