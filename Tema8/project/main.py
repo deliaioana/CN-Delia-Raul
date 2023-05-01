@@ -22,7 +22,7 @@ def function_v1(x: float):
 
 
 def function_v2(x: float):
-    return (x ** 2) * np.sin(x)
+    return (x ** 2) + np.sin(x)
 
 
 def function_v3(x: float):
