@@ -1,7 +1,6 @@
 import numpy as np
 import random
 import gradio as gr
-import scipy as scipy
 
 MATRIX_V1 = np.array([[2., 4., 5.], [4., 12., 14.], [5., 14., 19.5]])
 SIZE_V1 = 3
@@ -14,6 +13,7 @@ PRECISION_V2 = 10 ** (-8)
 VECT_V2 = np.random.rand(5)
 
 demo = gr.Blocks()
+text = ''
 
 
 def is_zero(number, precision):
@@ -88,6 +88,7 @@ def generate_symmetrical_matrix(size):
 
 
 def solve(version: int):
+    global text
     text = ''
 
     if version == 1:
