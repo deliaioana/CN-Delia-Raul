@@ -171,13 +171,22 @@ def multiply_strassen(matrix_a, matrix_b, n, n_min):
         return c
 
 
+def print_ex3(version: int):
+    if version == 1:
+        return multiply_strassen(A, B, 4, 1)
+    elif version == 2:
+        return multiply_strassen(C, D, 2, 1)
+    else:
+        return "Something went wrong"
+
+
 def run():
+    # global precision
     # precision = ex1()
     # ex2(precision)
     # ex3(A, B, 4, 1)
     # print('Simple multiplication: ', np.dot(A, B))
-    #
-    ex3(C, D, 2, 1)
+    # ex3(C, D, 2, 1)
 
     with demo:
         ex1_markdown = gr.Markdown(f"Exercise 1")
@@ -191,17 +200,13 @@ def run():
         ex2_button.click(print_ex2, outputs=ex2_solution)
 
         ex3_markdown = gr.Markdown(f"Exercise 3")
-        ex3_input_n = gr.Number(label="Select n")
-        ex3_input_n_min = gr.Number(label="Select n min")
-        # ex3_input_matrix_a = gr.Numpy(datatype="number", row_count=2,
-        #                               col_count=2, label=f"Enter matrix A:")
-        # ex3_input_matrix_b = gr.Numpy(datatype="number", row_count=2,
-        #                               col_count=2, label=f"Enter matrix B:")
-        # ex3_button_matrix_v1 = gr.Button(f"Strassen set 1")
-        # ex3_solution = gr.Textbox()
-        # ex3_button_matrix_v1.click(multiply_strassen,
-        #                            inputs=[C, D, 2, 1],
-        #                            outputs=ex3_solution)
+        ex3_solution = gr.Textbox()
+        with gr.Row():
+            ex3_button_strassen_v1 = gr.Button(f"Strassen set 1")
+            ex3_button_strassen_v2 = gr.Button(f"Strassen set 2")
+
+            ex3_button_strassen_v1.click(print_ex3, inputs=[gr.Number(1, visible=False)], outputs=ex3_solution)
+            ex3_button_strassen_v2.click(print_ex3, inputs=[gr.Number(2, visible=False)], outputs=ex3_solution)
 
     demo.launch()
 
