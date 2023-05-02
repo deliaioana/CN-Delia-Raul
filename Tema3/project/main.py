@@ -3,6 +3,7 @@ import copy
 
 import numpy as np
 import random
+import gradio as gr
 
 # Given variables
 MATRIX_A = [[0., 0., 4.],
@@ -11,6 +12,9 @@ MATRIX_A = [[0., 0., 4.],
 N = 3
 PRECISION = 10 ** (-6)
 S = [3., 2., 1.]
+
+demo = gr.Blocks()
+text = ''
 
 
 def generate_symmetrical_matrix(size):
@@ -45,12 +49,18 @@ def randomize_input():
     return matrix_a, n, precision, s
 
 
-def get_input():
-    answer = input('Do you want to use specific input? y/n\n')
-    if answer == 'y':
+def get_input(version: int):
+    global text
+
+    # answer = input('Do you want to use specific input? y/n\n')
+    if version == 'y':
         variables = MATRIX_A, N, PRECISION, S
     else:
         variables = randomize_input()
+
+    text += f"The variables are: \n" \
+            f"MATRIX A: \n'{variables[0]}\n\nN: {variables[1]}\n\n" \
+            f"PRECISION: {variables[2]}\n\nVECTOR S: {variables[3]}\n\n"
     print('The variables are: \n')
     print('MATRIX A: \n', variables[0])
     print('N: ', variables[1])
@@ -170,19 +180,24 @@ def compare_inverses(inverted_a, lib_inverted_a, precision):
     return norm < precision
 
 
-def run():
+def solve(version: int):
+    global text
+    text = ''
+
     # Task 6
-    variables = get_input()
+    variables = get_input(version)
     matrix_a, n, precision, s = variables
     matrix_a_copy = copy.deepcopy(matrix_a)
 
     # Task 1
     b = compute_vector_b(matrix_a, s, n)
     b_copy = copy.deepcopy(b)
+    text += f"------------------------------------------------------------------------------------\nVECTOR B: \n{b}\n\n"
     print('VECTOR B: \n', b)
 
     # Task 2
     matrix_q, matrix_r = compute_qr_decomposition(matrix_a, n, b, precision)
+    text += f"Q: \n{matrix_q}\n\nR: \n{matrix_r}\n\n"
     print('Q: \n', matrix_q)
     print('R: \n', matrix_r)
 
@@ -190,6 +205,8 @@ def run():
     x_qr = compute_x_qr_with_library(matrix_a, b)
     print('X QR WITH LIBRARY: ', x_qr)
     x_householder = compute_x_householder(matrix_r, b)
+    text += f"X QR WITH LIBRARY: {x_qr}\n\n" \
+            f"X HOUSEHOLDER WITH LIBRARY: {x_householder}\n\nDIFFERENCE: {compute_difference(x_qr, x_householder)}\n\n"
     print('X HOUSEHOLDER WITH LIBRARY: ', x_householder)
     print('DIFFERENCE: ', compute_difference(x_qr, x_householder))
 
@@ -199,10 +216,27 @@ def run():
     # Task 5
     inverted_a = invert_using_qr_desc(matrix_a_copy, matrix_q, matrix_r, n)
     if isinstance(inverted_a, str):
+        text += "A is not invertible"
         print('A is not invertible')
     else:
         lib_inverted_a = np.linalg.inv(matrix_a_copy)
+        text += f"Inverses are the same: {compare_inverses(inverted_a, lib_inverted_a, precision)}"
         print(compare_inverses(inverted_a, lib_inverted_a, precision))
+
+    return text
+
+
+def run():
+    with demo:
+        solve_area = gr.Textbox(label="Solution:")
+        with gr.Row():
+            solve_button_v1 = gr.Button("Solve preset")
+            solve_button_v2 = gr.Button("Solve random")
+
+            solve_button_v1.click(solve, inputs=[gr.Number(1, visible=False)], outputs=solve_area)
+            solve_button_v2.click(solve, inputs=[gr.Number(2, visible=False)], outputs=solve_area)
+
+    demo.launch()
 
 
 run()
