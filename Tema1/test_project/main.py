@@ -1,6 +1,7 @@
 import random
 
 import numpy as np
+import gradio as gr
 
 # Resources:
 # https://www.youtube.com/watch?v=OSelhO6Qnlc
@@ -30,8 +31,12 @@ D = np.array([
     [2.9, 2.0],
     [2.7, 1.8]])
 
+demo = gr.Blocks()
+precision = 0
+
 
 def ex1():
+    global precision
     print('-------------------------------------')
     print('Ex 1\n')
 
@@ -43,7 +48,9 @@ def ex1():
 
     print('u = ', u)
     print('m = ', count)
-    return u
+    precision = u
+
+    return precision
 
 
 def ex2(machine_precision):
@@ -54,19 +61,24 @@ def ex2(machine_precision):
     left_sum = (one + machine_precision) + machine_precision
     right_sum = one + (machine_precision + machine_precision)
 
+    text = ''
     if left_sum == right_sum:
+        text += "Equal sums\n"
         print('Equal sums')
     else:
+        text += f"Equal sums\n"
         print('Not equal')
         print('(', one, '+', machine_precision, ') +', machine_precision, '==', left_sum)
         print(one, '+ (', machine_precision, '+', machine_precision, ') ==', right_sum)
 
-    find_multiplication_example()
+    second_text = find_multiplication_example()
+    return text + "\n" + second_text
 
 
 def find_multiplication_example():
     found = False
     counter = 0
+    text = ''
 
     while not found:
         counter += 1
@@ -84,6 +96,15 @@ def find_multiplication_example():
 
             print('Found random in ', counter, ' tries')
             break
+
+    text += f"Found random in {counter} tries"
+    return text
+
+
+def print_ex2():
+    global precision
+    text = ex2(precision)
+    return text
 
 
 def ex3(matrix_a, matrix_b, n, n_min):
@@ -109,6 +130,9 @@ def dumb_multiply(matrix_a, matrix_b, n):
 
 
 def multiply_strassen(matrix_a, matrix_b, n, n_min):
+    n = int(n)
+    n_min = int(n_min)
+
     if n == n_min:
         # if matrices are small enough
         return dumb_multiply(matrix_a, matrix_b, n)
@@ -147,9 +171,39 @@ def multiply_strassen(matrix_a, matrix_b, n, n_min):
         return c
 
 
-precision = ex1()
-ex2(precision)
-ex3(A, B, 4, 1)
-print('Simple multiplication: ', np.dot(A, B))
+def run():
+    # precision = ex1()
+    # ex2(precision)
+    # ex3(A, B, 4, 1)
+    # print('Simple multiplication: ', np.dot(A, B))
+    #
+    ex3(C, D, 2, 1)
 
-ex3(C, D, 2, 1)
+    with demo:
+        ex1_markdown = gr.Markdown(f"Exercise 1")
+        ex1_button = gr.Button("Find machine precision")
+        ex1_solution = gr.Textbox()
+        ex1_button.click(ex1, outputs=ex1_solution)
+
+        ex2_markdown = gr.Markdown(f"Exercise 2")
+        ex2_button = gr.Button("Check property")
+        ex2_solution = gr.Textbox()
+        ex2_button.click(print_ex2, outputs=ex2_solution)
+
+        ex3_markdown = gr.Markdown(f"Exercise 3")
+        ex3_input_n = gr.Number(label="Select n")
+        ex3_input_n_min = gr.Number(label="Select n min")
+        # ex3_input_matrix_a = gr.Numpy(datatype="number", row_count=2,
+        #                               col_count=2, label=f"Enter matrix A:")
+        # ex3_input_matrix_b = gr.Numpy(datatype="number", row_count=2,
+        #                               col_count=2, label=f"Enter matrix B:")
+        # ex3_button_matrix_v1 = gr.Button(f"Strassen set 1")
+        # ex3_solution = gr.Textbox()
+        # ex3_button_matrix_v1.click(multiply_strassen,
+        #                            inputs=[C, D, 2, 1],
+        #                            outputs=ex3_solution)
+
+    demo.launch()
+
+
+run()
