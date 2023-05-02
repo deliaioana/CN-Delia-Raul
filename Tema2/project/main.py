@@ -1,10 +1,19 @@
 import numpy as np
 import random
-
+import gradio as gr
 import scipy as scipy
 
-# MATRIX = np.array([[2., 4., 5.], [4., 12., 14.], [5., 14., 19.5]])
-MATRIX = np.array([[1., 2.5, 3.], [2.5, 8.25, 15.5], [3., 15.5, 43.]])
+MATRIX_V1 = np.array([[2., 4., 5.], [4., 12., 14.], [5., 14., 19.5]])
+SIZE_V1 = 3
+PRECISION_V1 = 10 ** (-8)
+VECT_V1 = [12., 38., 68.]
+
+MATRIX_V2 = np.array([[1., 2.5, 3.], [2.5, 8.25, 15.5], [3., 15.5, 43.]])
+SIZE_V2 = 5
+PRECISION_V2 = 10 ** (-8)
+VECT_V2 = np.random.rand(5)
+
+demo = gr.Blocks()
 
 
 def is_zero(number, precision):
@@ -78,15 +87,29 @@ def generate_symmetrical_matrix(size):
     return matrix_a
 
 
-def run(size, precision, vect):
-    # uncomment one
-    # matrix_a = MATRIX.copy()
-    matrix_a = generate_symmetrical_matrix(size)
+def solve(version: int):
+    text = ''
+
+    if version == 1:
+        size = SIZE_V1
+        precision = PRECISION_V1
+        vect = VECT_V1
+        matrix_a = MATRIX_V1.copy()
+
+    elif version == 2:
+        size = SIZE_V2
+        precision = PRECISION_V2
+        vect = VECT_V2
+        matrix_a = generate_symmetrical_matrix(size)
+
+    else:
+        return "Something went wrong"
 
     copy = matrix_a.copy()
 
     result = decompose_matrix(matrix_a, [0.0] * size, precision)
     if not result:
+        text += "There was a 0 in d\n"
         print("There was a 0 in d")
     else:
         matrix_a, d = result
@@ -98,6 +121,8 @@ def run(size, precision, vect):
         print('Y:', y)
         x = calculate_x(matrix_a, y, size)
         print('X: ', x)
+
+        text += f"A: {matrix_a}\nd: {d}\nZ: {z}\nY: {y}\nX: {x}\n"
 
     # print(f'Det A: {np.linalg.det(copy)}')
     L = np.zeros((size, size), dtype=float)
@@ -115,21 +140,31 @@ def run(size, precision, vect):
                 D[i][j] = 0.
     Lt = np.transpose(L)
 
+    text += f"Det LDLt: {np.linalg.det(L) * np.linalg.det(D) * np.linalg.det(Lt)}\n"
     print(f'Det LDLt: {np.linalg.det(L) * np.linalg.det(D) * np.linalg.det(Lt)}')
 
-    # L = scipy.linalg.cholesky(copy, lower=True)
-    # U = scipy.linalg.cholesky(copy, lower=False)
-    #
-    # print(f'L: {L}')
-    # print(f'U: {U}')
-
     auto_x = np.linalg.solve(copy, vect)
+    text += f"{auto_x}\n"
     print(auto_x)
 
     auto_sol = np.linalg.norm(np.dot(copy, auto_x) - vect)
+    text += f"Solution correct: {is_zero(auto_sol, precision)}\n"
     print(f'Solution correct: {is_zero(auto_sol, precision)}')
 
+    return text
 
-# uncomment one
-# run(3, 0.00000001, [12., 38., 68.])
-run(5, 0.00000001, np.random.rand(5))
+
+def run():
+    with demo:
+        solve_area = gr.Textbox(label="Solution:")
+        with gr.Row():
+            solve_button_v1 = gr.Button("Solve set 1")
+            solve_button_v2 = gr.Button("Solve set 2")
+
+            solve_button_v1.click(solve, inputs=[gr.Number(1, visible=False)], outputs=solve_area)
+            solve_button_v2.click(solve, inputs=[gr.Number(2, visible=False)], outputs=solve_area)
+
+    demo.launch()
+
+
+run()
