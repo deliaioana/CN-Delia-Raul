@@ -1,11 +1,15 @@
 import numpy
 import numpy as np
+import gradio as gr
 
 # Given variables
 PRECISION = 10 ** (-6)
+demo = gr.Blocks()
+text = ''
 
 
 def get_input_from_files(file_a, file_b):
+    global text
     with open(file_a) as f:
         size_a = [int(x) for x in next(f).split()][0]
         matrix_a = [[] for _ in range(size_a)]
@@ -38,6 +42,7 @@ def get_input_from_files(file_a, file_b):
             if not non_zero_elem:
                 diagonal.append(0.)
 
+        # text += f"DIAGONAL: {diagonal}\n"
         print('DIAGONAL: ', diagonal)
 
     with open(file_b) as f:
@@ -54,9 +59,15 @@ def get_input_from_files(file_a, file_b):
     return matrix_a, n, vector_b, n, precision, diagonal
 
 
-def get_input():
-    variables = get_input_from_files('input_files/a2.txt', 'input_files/b2.txt')
+def get_input(version: int):
+    global text
+    variables = get_input_from_files(f"input_files/a_v{int(version)}.txt", f"input_files/b_v{int(version)}.txt")
 
+    # text += f"N (for matrix A): {variables[1]}\n" \
+    #         f"MATRIX A: \n{variables[0]}\n" \
+    #         f"N (for vector B): {variables[3]}\n" \
+    #         f"VECTOR B: {variables[2]}\n" \
+    #         f"PRECISION: {variables[4]}\n"
     print('N (for matrix A): ', variables[1])
     print('MATRIX A: \n', variables[0])
     print('N (for vector B): ', variables[3])
@@ -122,12 +133,16 @@ def compute_error(matrix_a, x, vector_b, diagonal):
     return np.linalg.norm(np.array(matrix_a_x) - np.array(vector_b), ord=np.inf)
 
 
-def run():
+def solve(version: int):
+    global text
+    text = ''
+
     # Task 1
-    variables = get_input()
+    variables = get_input(version)
     matrix_a, na, vector_b, nb, precision, diagonal = variables
 
     answer = has_zero_on_diagonal(matrix_a, na)
+    text += f"ARE ALL ELEMENTS ON THE DIAGONAL NON-ZERO? {not answer}\n"
     print('ARE ALL ELEMENTS ON THE DIAGONAL NON-ZERO?')
     print(not answer)
 
@@ -136,16 +151,38 @@ def run():
         solution = solve_with_gauss_seidel(matrix_a, vector_b, na)
 
         if solution == 'Divergence':
+            text += "Divergence\n"
             print(solution)
         else:
             x, number_of_iterations = solution
+            # text += f"SOLUTION FOR X: {x}\n" \
+            text += f"NUMBER OF ITERATIONS: {number_of_iterations}\n"
             print('SOLUTION FOR X: ', x)
             print('NUMBER OF ITERATIONS: ', number_of_iterations)
 
             # Task 3
             norm = compute_error(matrix_a, x, vector_b, diagonal)
+            text += f"NORM: {norm}\n" \
+                    f"IS IT LOWER THAN PRECISION? {(norm < precision)}\n"
             print('NORM: ', norm)
             print('IS IT LOWER THAN PRECISION? ', (norm < precision))
+
+    return text
+
+
+def run():
+    with demo:
+        solve_area = gr.Textbox(label="Solution:")
+        with gr.Row():
+            solve_button_v1 = gr.Button("Solve set 1")
+            solve_button_v2 = gr.Button("Solve set 2")
+            solve_button_v3 = gr.Button("Solve set 3")
+
+            solve_button_v1.click(solve, inputs=[gr.Number(0, visible=False)], outputs=solve_area)
+            solve_button_v2.click(solve, inputs=[gr.Number(1, visible=False)], outputs=solve_area)
+            solve_button_v3.click(solve, inputs=[gr.Number(2, visible=False)], outputs=solve_area)
+
+    demo.launch()
 
 
 run()
