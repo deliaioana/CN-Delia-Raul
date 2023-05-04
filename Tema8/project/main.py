@@ -1,11 +1,14 @@
 # HK 8
 import numpy as np
+import gradio as gr
 
 PRECISION = 10 ** (-5)
 K_MAX = 1000
 
 function_selector = 0
 H = 0
+demo = gr.Blocks()
+text = ''
 
 
 def function(x: float):
@@ -30,6 +33,7 @@ def function_v3(x: float):
 
 
 def get_input():
+    """[DEPRECATED]"""
     global function_selector, H
     function_selector = int(input("Select example: 1 / 2 / 3: "))
     power = int(input("Select power of h (5 or 6): "))
@@ -37,6 +41,7 @@ def get_input():
 
 
 def secant_method_v1():
+    global text
     if function_selector == 1:
         x = 3.41
         x0 = 3.40
@@ -75,13 +80,17 @@ def secant_method_v1():
         k += 1
 
     if np.abs(delta_x) < PRECISION:
+        text += f"Solution found: {x} in {k} iterations (first derivative v1)\n" \
+                f"Second derivative check: {second_derivative(x) > 0}\n"
         print(f"Solution found: {x} in {k} iterations (first derivative v1)")
         print(f"Second derivative check: {second_derivative(x) > 0}\n")
     else:
+        text += "Divergenta"
         print("Divergenta")
 
 
 def secant_method_v2():
+    global text
     if function_selector == 1:
         x = 3.41
         x0 = 3.40
@@ -120,9 +129,12 @@ def secant_method_v2():
         k += 1
 
     if np.abs(delta_x) < PRECISION:
+        text += f"Solution found: {x} in {k} iterations (first derivative v2)\n" \
+                f"Second derivative check: {second_derivative(x) > 0}\n"
         print(f"Solution found: {x} in {k} iterations (first derivative v2)")
         print(f"Second derivative check: {second_derivative(x) > 0}\n")
     else:
+        text += "Divergenta"
         print("Divergenta")
 
 
@@ -147,10 +159,33 @@ def second_derivative(x: float):
             (function(x - (2 * H)))) / (12 * (H ** 2))
 
 
-def run():
-    get_input()
+def solve(version: int, power: int):
+    global text, function_selector, H
+    text = ''
+    function_selector = int(version)
+    H = 10 ** (-int(power))
+
     secant_method_v1()
     secant_method_v2()
+
+    return text
+
+
+def run():
+    with demo:
+        solve_area = gr.Textbox(label="Solution:")
+        with gr.Row():
+            solve_button_v1 = gr.Button("Solve for function 1")
+            solve_button_v2 = gr.Button("Solve for function 2")
+            solve_button_v3 = gr.Button("Solve for function 3")
+
+            set_h = gr.Textbox(label="Select power of h (5 or 6): ")
+
+            solve_button_v1.click(solve, inputs=[gr.Number(1, visible=False), set_h], outputs=solve_area)
+            solve_button_v2.click(solve, inputs=[gr.Number(2, visible=False), set_h], outputs=solve_area)
+            solve_button_v3.click(solve, inputs=[gr.Number(3, visible=False), set_h], outputs=solve_area)
+
+    demo.launch()
 
 
 run()
