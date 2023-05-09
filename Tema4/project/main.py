@@ -8,11 +8,10 @@ demo = gr.Blocks()
 text = ''
 
 
-def get_input_from_files(file_a, file_b):
-    global text
-    with open(file_a) as f:
+def get_matrix_from_file(file):
+    with open(file) as f:
         size_a = [int(x) for x in next(f).split()][0]
-        matrix_a = [[] for _ in range(size_a)]
+        matrix = [[] for _ in range(size_a)]
 
         for line in f:
             values = line.replace(', ', ' ').split()
@@ -22,28 +21,34 @@ def get_input_from_files(file_a, file_b):
 
             new_value = value
 
-            current_pair = [pair[0] for pair in matrix_a[row] if pair[1] == col]
+            current_pair = [pair[0] for pair in matrix[row] if pair[1] == col]
             if current_pair:
                 current_value = current_pair[0]
-                matrix_a[row].remove((current_value, col))
+                matrix[row].remove((current_value, col))
 
                 new_value = current_value + value
 
-            matrix_a[row].append((new_value, col))
+            matrix[row].append((new_value, col))
+        return matrix
 
-        diagonal = []
 
-        for count, row in enumerate(matrix_a):
-            non_zero_elem = False
-            for pair in row:
-                if pair[1] == count:
-                    diagonal.append(pair[0])
-                    non_zero_elem = True
-            if not non_zero_elem:
-                diagonal.append(0.)
+def get_input_from_files(file_a, file_b):
+    global text
+    matrix_a = get_matrix_from_file(file_a)
 
-        # text += f"DIAGONAL: {diagonal}\n"
-        print('DIAGONAL: ', diagonal)
+    diagonal = []
+
+    for count, row in enumerate(matrix_a):
+        non_zero_elem = False
+        for pair in row:
+            if pair[1] == count:
+                diagonal.append(pair[0])
+                non_zero_elem = True
+        if not non_zero_elem:
+            diagonal.append(0.)
+
+    # text += f"DIAGONAL: {diagonal}\n"
+    print('DIAGONAL: ', diagonal)
 
     with open(file_b) as f:
         size_b = [int(x) for x in next(f).split()][0]
@@ -170,6 +175,60 @@ def solve(version: int):
     return text
 
 
+def get_element_from_position(i, j, matrix):
+    row = matrix[i]
+    print(i, j, row)
+    elements = [x for x in row if x[1] == j]
+    return elements[0][0]
+
+
+def compute_sum_of_matrices_and_check_with_file(matrix_a, matrix_b, sum_matrix, precision):
+    if len(matrix_a) != len(matrix_b):
+        return 1, False
+
+    size = len(matrix_a)
+    matrix_c = [[] for _ in range(size)]
+
+    for i in range(size):
+        for j in range(size):
+            elem_a = next((pair[0] for pair in matrix_a[i] if pair[1] == j), 0)
+            elem_b = next((pair[0] for pair in matrix_b[i] if pair[1] == j), 0)
+
+            elem_sum = elem_a + elem_b
+            if abs(elem_sum) > precision:
+                matrix_c[i].append((elem_sum, j))
+
+    if size != len(sum_matrix):
+        return 2, False
+
+    for i in range(size):
+        if len(matrix_c[i]) != len(sum_matrix[i]):
+            return 3, False
+        for element_number in range(len(matrix_c[i])):
+            j = matrix_c[i][element_number][1]
+
+            element_from_file = matrix_c[i][element_number][0]
+            element_from_sum = get_element_from_position(i, j, sum_matrix)
+
+            if abs(element_from_file - element_from_sum) > precision:
+                return (element_from_file, element_from_sum, i, j, sum_matrix), False
+
+    return sum_matrix, True
+
+
+def bonus():
+    matrix_a = get_matrix_from_file('input_files/bonus_a.txt')
+    matrix_b = get_matrix_from_file('input_files/bonus_b.txt')
+    file_sum = get_matrix_from_file('input_files/bonus_sum.txt')
+    computed_sum, correct = compute_sum_of_matrices_and_check_with_file(matrix_a, matrix_b, file_sum, PRECISION)
+
+    return matrix_a, matrix_b, file_sum, computed_sum, correct
+
+
+def get_object(obj):
+    return obj
+
+
 def run():
     with demo:
         solve_area = gr.Textbox(label="Solution:")
@@ -181,6 +240,29 @@ def run():
             solve_button_v1.click(solve, inputs=[gr.Number(0, visible=False)], outputs=solve_area)
             solve_button_v2.click(solve, inputs=[gr.Number(1, visible=False)], outputs=solve_area)
             solve_button_v3.click(solve, inputs=[gr.Number(2, visible=False)], outputs=solve_area)
+
+        matrix_a, matrix_b, sum_from_file, computed_sum, correct = bonus()
+
+        bonus_area_1 = gr.Textbox(label="Bonus\nMatrix A:")
+        solve_button_v1 = gr.Button("Get matrix A")
+
+        bonus_area_2 = gr.Textbox(label="Matrix B:")
+        solve_button_v2 = gr.Button("Get matrix B")
+
+        bonus_area_3 = gr.Textbox(label="Sum from file:")
+        solve_button_v3 = gr.Button("Get sum from file")
+
+        bonus_area_4 = gr.Textbox(label="Compute sum:")
+        solve_button_v4 = gr.Button("Compute sum")
+
+        bonus_area_5 = gr.Textbox(label="Correct?")
+        solve_button_v5 = gr.Button("Correct?")
+
+        solve_button_v1.click(get_object, inputs=[gr.Variable(matrix_a)], outputs=bonus_area_1)
+        solve_button_v2.click(get_object, inputs=[gr.Variable(matrix_b)], outputs=bonus_area_2)
+        solve_button_v3.click(get_object, inputs=[gr.Variable(sum_from_file)], outputs=bonus_area_3)
+        solve_button_v4.click(get_object, inputs=[gr.Variable(computed_sum)], outputs=bonus_area_4)
+        solve_button_v5.click(get_object, inputs=[gr.Variable(correct)], outputs=bonus_area_5)
 
     demo.launch()
 
