@@ -183,9 +183,9 @@ def solve(version: int):
 
     Lt = np.transpose(L)
 
-    ldl_decomposition = np.linalg.det(L) * np.linalg.det(D) * np.linalg.det(Lt)
-    text += f"Det LDLt: {ldl_decomposition}\n"
-    print(f'Det LDLt: {ldl_decomposition}')
+    ldl_det = np.linalg.det(L) * np.linalg.det(D) * np.linalg.det(Lt)
+    text += f"Det LDLt: {ldl_det}\n"
+    print(f'Det LDLt: {ldl_det}')
 
     auto_x = np.linalg.solve(copy, vect)
     text += f"{auto_x}\n"
@@ -195,7 +195,7 @@ def solve(version: int):
     text += f"Solution correct: {is_zero(auto_sol, precision)}\n"
     print(f'Solution correct: {is_zero(auto_sol, precision)}')
 
-    return text, ldl_decomposition, matrix_a, d, len(matrix_a)
+    return text, matrix_a, matrix_a, d, len(matrix_a)
 
 
 def get_text_from_solve(version: int):
@@ -205,7 +205,8 @@ def get_text_from_solve(version: int):
 def solve_bonus(version: int):
     global text
     _, ldl_decomposition, matrix, d, n = solve(version)
-    text = str(verify_decomposition(ldl_decomposition, matrix, d, n))
+    text = f"LDL Decomposition: {ldl_decomposition}\nCholesky decomposition: {matrix}\nAre they equal?: "
+    text += str(verify_decomposition(ldl_decomposition, matrix, d, n))
     return text
 
 
