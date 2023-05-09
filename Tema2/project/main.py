@@ -87,6 +87,47 @@ def generate_symmetrical_matrix(size):
     return matrix_a
 
 
+def compute_app(matrix, d, p):
+    sum_value = 0
+
+    for k in range(p):
+        sum_value += d[k] * matrix[p][k] ** 2
+
+    return sum_value + d[p]
+
+
+def compute_aip(matrix, d, i, p):
+    sum_value = 0
+
+    for k in range(p):
+        sum_value += d[k] * matrix[i][k] * matrix[p][k]
+
+    return sum_value + matrix[i][p] * d[p]
+
+
+def cholesky_bonus(matrix, d, n):
+    matrix_copy = np.matrix(matrix).copy().tolist()
+
+    for i in range(n):
+        for j in range(n):
+            if j < i:
+                matrix[i][j] = compute_aip(matrix_copy, d, i, j)
+            if i == j:
+                matrix[i][i] = compute_app(matrix_copy, d, j)
+
+    return matrix
+
+
+def verify_decomposition(initial_matrix, matrix, d, n):
+    constant = 10 ** (-5)
+    matrix = cholesky_bonus(matrix, d, n)
+    for i in range(n):
+        for j in range(n):
+            if abs(matrix[i][j] - initial_matrix[i][j]) > constant:
+                return False
+    return True
+
+
 def solve(version: int):
     global text
     text = ''
@@ -139,10 +180,12 @@ def solve(version: int):
             else:
                 L[i][j] = matrix_a[i][j]
                 D[i][j] = 0.
+
     Lt = np.transpose(L)
 
-    text += f"Det LDLt: {np.linalg.det(L) * np.linalg.det(D) * np.linalg.det(Lt)}\n"
-    print(f'Det LDLt: {np.linalg.det(L) * np.linalg.det(D) * np.linalg.det(Lt)}')
+    ldl_decomposition = np.linalg.det(L) * np.linalg.det(D) * np.linalg.det(Lt)
+    text += f"Det LDLt: {ldl_decomposition}\n"
+    print(f'Det LDLt: {ldl_decomposition}')
 
     auto_x = np.linalg.solve(copy, vect)
     text += f"{auto_x}\n"
@@ -152,6 +195,17 @@ def solve(version: int):
     text += f"Solution correct: {is_zero(auto_sol, precision)}\n"
     print(f'Solution correct: {is_zero(auto_sol, precision)}')
 
+    return text, ldl_decomposition, matrix_a, d, len(matrix_a)
+
+
+def get_text_from_solve(version: int):
+    return solve(version)[0]
+
+
+def solve_bonus(version: int):
+    global text
+    _, ldl_decomposition, matrix, d, n = solve(version)
+    text = str(verify_decomposition(ldl_decomposition, matrix, d, n))
     return text
 
 
@@ -164,6 +218,14 @@ def run():
 
             solve_button_v1.click(solve, inputs=[gr.Number(1, visible=False)], outputs=solve_area)
             solve_button_v2.click(solve, inputs=[gr.Number(2, visible=False)], outputs=solve_area)
+
+        bonus_area = gr.Textbox(label="Bonus:")
+        with gr.Row():
+            solve_bonus_button_v1 = gr.Button("Solve bonus for set 1")
+            solve_bonus_button_v2 = gr.Button("Solve bonus for set 2")
+
+            solve_bonus_button_v1.click(solve_bonus, inputs=[gr.Number(1, visible=False)], outputs=bonus_area)
+            solve_bonus_button_v2.click(solve_bonus, inputs=[gr.Number(2, visible=False)], outputs=bonus_area)
 
     demo.launch()
 
