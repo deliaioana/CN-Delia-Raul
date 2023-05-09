@@ -216,11 +216,12 @@ def apply_zeros(matrix, n):
 
 
 def get_next_power_of_2(x):
-    return 1 if x == 0 else 2**(x - 1).bit_length()
+    return 1 if x == 0 else 2 ** (x - 1).bit_length()
 
 
 def multiply_strassen_for_non_square_matrices(matrix_a, matrix_b):
     real_n = matrix_a.shape[0]
+    real_m = matrix_b.shape[1]
 
     n = get_max_dimension(matrix_a, matrix_b)
     n = get_next_power_of_2(n)
@@ -232,7 +233,7 @@ def multiply_strassen_for_non_square_matrices(matrix_a, matrix_b):
     print(second_matrix)
     print(real_n)
 
-    return multiply_strassen(first_matrix, second_matrix, n, 1)[:real_n, :real_n]
+    return multiply_strassen(first_matrix, second_matrix, n, 1)[:real_n, :real_m]
 
 
 def generate_random_matrix(size, position):
@@ -244,10 +245,11 @@ def generate_random_matrix(size, position):
         return np.random.rand(size, n)
 
 
-def check_matrices_equality(result, lib_mul, precision):
+def check_matrices_equality(result, lib_mul):
+    current_precision = 10 ** (-6)
     for i in range(len(result)):
         for j in range(len(result[i])):
-            if abs(result[i][j] - lib_mul[i][j]) > precision:
+            if abs(result[i][j] - lib_mul[i][j]) > current_precision:
                 return False
     return True
 
@@ -268,12 +270,12 @@ def print_bonus(version: int):
 
         result = multiply_strassen_for_non_square_matrices(matrix_a, matrix_b)
         lib_mul = np.matmul(matrix_a, matrix_b)
-        text = f"First matrix:\n {E}\n\nSecond matrix:\n {F}\n\nMultiplication:\n {result}\n\nLibrary check:" \
-               f"\n{lib_mul}\n\nAre they equal? "
+        text = f"First matrix:\n {matrix_a}\n\nSecond matrix:\n {matrix_b}\n\nMultiplication:\n {result}\n\nLibrary " \
+               f"check:\n{lib_mul}\n\nAre they equal? "
 
-        correct = check_matrices_equality(result, lib_mul, precision)
+        correct = check_matrices_equality(result, lib_mul)
         text += str(correct)
-        
+
     return text
 
 
@@ -286,17 +288,17 @@ def run():
     # ex3(C, D, 2, 1)
 
     with demo:
-        ex1_markdown = gr.Markdown(f"Exercise 1")
+        gr.Markdown(f"Exercise 1")
         ex1_button = gr.Button("Find machine precision")
         ex1_solution = gr.Textbox()
         ex1_button.click(ex1, outputs=ex1_solution)
 
-        ex2_markdown = gr.Markdown(f"Exercise 2")
+        gr.Markdown(f"Exercise 2")
         ex2_button = gr.Button("Check property")
         ex2_solution = gr.Textbox()
         ex2_button.click(print_ex2, outputs=ex2_solution)
 
-        ex3_markdown = gr.Markdown(f"Exercise 3")
+        gr.Markdown(f"Exercise 3")
         ex3_solution = gr.Textbox()
         with gr.Row():
             ex3_button_strassen_v1 = gr.Button(f"Strassen set 1")
@@ -305,12 +307,7 @@ def run():
             ex3_button_strassen_v1.click(print_ex3, inputs=[gr.Number(1, visible=False)], outputs=ex3_solution)
             ex3_button_strassen_v2.click(print_ex3, inputs=[gr.Number(2, visible=False)], outputs=ex3_solution)
 
-        # bonus_markdown = gr.Markdown(f"Bonus")
-        # bonus_button = gr.Button("Check property")
-        # bonus_solution = gr.Textbox()
-        # bonus_button.click(print_bonus, outputs=bonus_solution)
-
-        bonus_markdown = gr.Markdown(f"Bonus")
+        gr.Markdown(f"Bonus")
         bonus_solution = gr.Textbox()
         with gr.Row():
             bonus_button_v1 = gr.Button(f"Preset")
