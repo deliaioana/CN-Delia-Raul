@@ -243,7 +243,7 @@ def run():
 
         matrix_a, matrix_b, sum_from_file, computed_sum, correct = bonus()
 
-        bonus_area_1 = gr.Textbox(label="Matrix A:")
+        bonus_area_1 = gr.Textbox(label="Bonus\nMatrix A:")
         solve_button_v1 = gr.Button("Get matrix A")
 
         bonus_area_2 = gr.Textbox(label="Matrix B:")

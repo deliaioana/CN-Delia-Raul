@@ -205,7 +205,7 @@ def get_text_from_solve(version: int):
 def solve_bonus(version: int):
     global text
     _, ldl_decomposition, matrix, d, n = solve(version)
-    text = f"LDL Decomposition: {ldl_decomposition}\nCholesky decomposition: {matrix}\nAre they equal?: "
+    text = f"LDL Decomposition:\n {ldl_decomposition}\n\nCholesky decomposition:\n {matrix}\n\nAre they equal? "
     text += str(verify_decomposition(ldl_decomposition, matrix, d, n))
     return text
 

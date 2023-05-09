@@ -235,9 +235,46 @@ def multiply_strassen_for_non_square_matrices(matrix_a, matrix_b):
     return multiply_strassen(first_matrix, second_matrix, n, 1)[:real_n, :real_n]
 
 
-def print_bonus():
-    result = multiply_strassen_for_non_square_matrices(E, F)
-    return E.tolist(), F.tolist(), result.tolist()
+def generate_random_matrix(size, position):
+    n = np.random.randint(1, 100)
+
+    if position == 1:
+        return np.random.rand(n, size)
+    else:
+        return np.random.rand(size, n)
+
+
+def check_matrices_equality(result, lib_mul, precision):
+    for i in range(len(result)):
+        for j in range(len(result[i])):
+            if abs(result[i][j] - lib_mul[i][j]) > precision:
+                return False
+    return True
+
+
+def print_bonus(version: int):
+    if version == 1:
+        result = multiply_strassen_for_non_square_matrices(E, F)
+        lib_mul = np.matmul(E, F)
+        text = f"First matrix:\n {E}\n\nSecond matrix:\n {F}\n\nMultiplication:\n {result}\n\nLibrary check:\n{lib_mul}"
+
+    else:
+        common_size = np.random.randint(1, 100)
+
+        matrix_a = generate_random_matrix(common_size, 1)
+        matrix_b = generate_random_matrix(common_size, 2)
+
+        print('SHAPES', matrix_a.shape, matrix_b.shape)
+
+        result = multiply_strassen_for_non_square_matrices(matrix_a, matrix_b)
+        lib_mul = np.matmul(matrix_a, matrix_b)
+        text = f"First matrix:\n {E}\n\nSecond matrix:\n {F}\n\nMultiplication:\n {result}\n\nLibrary check:" \
+               f"\n{lib_mul}\n\nAre they equal? "
+
+        correct = check_matrices_equality(result, lib_mul, precision)
+        text += str(correct)
+        
+    return text
 
 
 def run():
@@ -268,10 +305,19 @@ def run():
             ex3_button_strassen_v1.click(print_ex3, inputs=[gr.Number(1, visible=False)], outputs=ex3_solution)
             ex3_button_strassen_v2.click(print_ex3, inputs=[gr.Number(2, visible=False)], outputs=ex3_solution)
 
+        # bonus_markdown = gr.Markdown(f"Bonus")
+        # bonus_button = gr.Button("Check property")
+        # bonus_solution = gr.Textbox()
+        # bonus_button.click(print_bonus, outputs=bonus_solution)
+
         bonus_markdown = gr.Markdown(f"Bonus")
-        bonus_button = gr.Button("Check property")
         bonus_solution = gr.Textbox()
-        bonus_button.click(print_bonus, outputs=bonus_solution)
+        with gr.Row():
+            bonus_button_v1 = gr.Button(f"Preset")
+            bonus_button_v2 = gr.Button(f"Random input")
+
+            bonus_button_v1.click(print_bonus, inputs=[gr.Number(1, visible=False)], outputs=bonus_solution)
+            bonus_button_v2.click(print_bonus, inputs=[gr.Number(2, visible=False)], outputs=bonus_solution)
 
     demo.launch()
 
